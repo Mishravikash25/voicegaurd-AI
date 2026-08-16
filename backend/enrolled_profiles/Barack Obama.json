@@ -1,0 +1,11 @@
+{
+  "speaker_name": "Barack Obama",
+  "description": "Default Reference Profile (obama-original.wav)",
+  "sample_count": 1,
+  "filenames": [
+    "obama-original.wav"
+  ],
+  "vector_shape": [
+    130
+  ]
+}

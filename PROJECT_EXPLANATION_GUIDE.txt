@@ -1,0 +1,146 @@
+===============================================================================
+               VOICEGUARD AI - COMPLETE PROJECT EXPLANATION GUIDE
+===============================================================================
+
+ABOUT THIS FILE:
+This document is a single-source-of-truth reference guide explaining how VoiceGuard AI 
+works, how every module functions, how to run local/Docker setups, and how to 
+push images to Docker Hub.
+
+-------------------------------------------------------------------------------
+1. WHAT IS VOICEGUARD AI?
+-------------------------------------------------------------------------------
+VoiceGuard AI is a biometric audio forensics system designed to detect AI-generated 
+deepfake audio, voice clones, and perform speaker verification.
+
+It answers three core forensic questions:
+  1. Pairwise Verification (1:1): Is Suspect Audio sample B spoken by the same 
+     authentic speaker as Reference Audio sample A?
+  2. Dataset Identification (1:N): Which enrolled candidate speaker in a 
+     dataset library matches the target suspect audio clip?
+  3. Deepfake Scanner: Is a single uploaded voice clip authentic human speech 
+     or a synthetic AI voice clone?
+
+-------------------------------------------------------------------------------
+2. SYSTEM ARCHITECTURE & DATA FLOW
+-------------------------------------------------------------------------------
+[Audio Files (.wav / .mp3)]
+       │
+       ▼
+1. Audio Preprocessing (`ml_system/audio_preprocessing.py`)
+   - Resamples audio to 8000 Hz.
+   - Applies ITU-T G.712 bandpass filter (300 Hz - 3400 Hz) to isolate human voice.
+   - Frames audio into 30ms Hamming windowed overlapping frames.
+       │
+       ▼
+2. Feature Extraction (`ml_system/feature_extractor.py`)
+   - Extracts 65-dimensional feature vectors:
+     • 20 MFCCs (Mel-Frequency Cepstral Coefficients - acoustic timbre)
+     • 20 Delta MFCCs (speed of pitch/tone change)
+     • 20 Delta-Delta MFCCs (acceleration of pitch/tone change)
+     • Spectral Centroid, Spectral Flatness, Spectral Crest Factor
+     • Shannon Entropy & Renyi Entropy (voice randomness / complexity)
+   - Applies Cepstral Mean Normalization (CMN) to eliminate microphone/channel bias.
+       │
+       ▼
+3. GMM Speaker Modeling (`ml_system/gmm_classifier.py`)
+   - Fits a 16-component Gaussian Mixture Model (GMM) on reference voice features 
+     using the Expectation-Maximization (EM) algorithm.
+       │
+       ▼
+4. Voice Similarity Scaling (`ml_system/similarity_engine.py`)
+   - Evaluates suspect voice features against the trained GMM.
+   - Computes log-likelihood: L = log p(X_suspect | GMM_ref)
+   - Converts acoustic distance into a normalized 0-100% Similarity Score.
+   - Categorizes Verdict:
+       • Score >= 75%  => AUTHENTIC (Low Risk)
+       • Score 45-74%  => INCONCLUSIVE (Moderate Risk)
+       • Score < 45%   => FRAUDULENT / SYNTHETIC (High Risk)
+       │
+       ▼
+5. Model Evaluation Suite (`ml_system/evaluate_system.py`)
+   - Performs Stratified 5-Fold Cross Validation.
+   - Computes Accuracy, Precision, Recall, F1-Score, Equal Error Rate (EER),
+     Confusion Matrix, and AWGN Noise Robustness (20dB, 10dB, 5dB, 0dB).
+       │
+       ▼
+6. FastAPI REST API (`backend/routes/predict.py`)
+   - `POST /analyze-similarity`: 1:1 Dual-voice GMM similarity check.
+   - `POST /identify-speaker`: 1:N Multi-speaker dataset ranking & identification.
+   - `POST /predict`: Single-audio synthetic deepfake scanner.
+       │
+       ▼
+7. React Web Dashboard (`src/components/Upload.jsx`)
+   - Futuristic dark-mode UI displaying audio waveforms, drag-and-drop upload 
+     zones, mode tab switchers, and real-time candidate ranking leaderboards.
+
+-------------------------------------------------------------------------------
+3. FILE-BY-FILE DIRECTORY MAP
+-------------------------------------------------------------------------------
+• `ml_system/`
+   - `audio_preprocessing.py`: Audio loading, G.712 bandpass filter, framing.
+   - `feature_extractor.py`: Extracts 65-D acoustic & spectral features + CMN.
+   - `gmm_classifier.py`: Scikit-Learn 16-component SpeakerGMM wrapper.
+   - `similarity_engine.py`: Maps log-likelihood scores to 0-100% similarity.
+   - `evaluate_system.py`: Stratified 5-Fold cross-validation & noise benchmark suite.
+
+• `backend/`
+   - `app.py`: Main FastAPI application, CORS middleware, route registration.
+   - `routes/predict.py`: API endpoint handlers for forensic requests.
+   - `requirements.txt`: Python production dependencies.
+   - `Dockerfile`: Container configuration for backend Python service.
+
+• `src/` (Frontend React UI)
+   - `App.jsx`: Main React page layout, visual effects, and header.
+   - `components/Upload.jsx`: 3-mode upload interface (1:1, 1:N, Single).
+   - `components/Loading.jsx`: Cyberpunk scanning animation during analysis.
+   - `components/Result.jsx`: Visual report card for similarity scores.
+
+• `test_samples/` & `generate_test_samples.py`: Synthetic audio samples generator for live demo.
+• `VIVA_DEFENSE_AND_DEMO_GUIDE.md`: Master thesis presentation & viva defense Q&A script.
+• `docker-compose.yml`: Multi-container orchestrator connecting Frontend + Backend.
+• `VOICEGUARD_AI_PROJECT_REQUIREMENTS_AND_PROMPTS.md`: Full major project thesis document.
+
+-------------------------------------------------------------------------------
+4. HOW TO RUN THE PROJECT & DEPLOY TO DOCKER HUB
+-------------------------------------------------------------------------------
+METHOD A: LOCAL DEVELOPMENT (WITHOUT DOCKER)
+  1. Open Terminal in project folder.
+  2. Start Backend API:
+     .\venv\Scripts\python.exe -m uvicorn backend.app:app --reload --port 8000
+  3. Open Second Terminal & Start Frontend:
+     npm run dev
+  4. Access Web App in Browser at: http://localhost:5173
+
+METHOD B: DOCKER COMPOSE
+  1. Open Docker Desktop on Windows.
+  2. Start both Frontend and Backend containers:
+     docker compose up --build -d
+  3. Open Browser at: http://localhost:5173
+
+METHOD C: PUSHING PRODUCTION DOCKER IMAGES TO DOCKER HUB
+  1. Log in to Docker Hub:
+     docker login -u YOUR_DOCKERHUB_USERNAME
+  2. Tag production images:
+     docker tag voiceguard_ai-backend:latest YOUR_DOCKERHUB_USERNAME/voiceguard-backend:v1.0
+     docker tag voiceguard_ai-frontend:latest YOUR_DOCKERHUB_USERNAME/voiceguard-frontend:v1.0
+  3. Push images to Docker Hub:
+     docker push YOUR_DOCKERHUB_USERNAME/voiceguard-backend:v1.0
+     docker push YOUR_DOCKERHUB_USERNAME/voiceguard-frontend:v1.0
+
+-------------------------------------------------------------------------------
+5. COMPLETE RECENT GIT COMMITS ON GITHUB
+-------------------------------------------------------------------------------
+Repository: https://github.com/Mishravikash25/voicegaurd-AI.git (Branch: main)
+
+• 558bba0: feat(ml): implement GMM speaker classifier & voice similarity scaler
+• f428df2: feat(api): connect FastAPI backend endpoints with ML pipeline
+• f7f49bc: feat(ui): implement dual-voice GMM similarity dashboard
+• db960a1: chore(git): ignore Python bytecode pycache & virtual environment
+• 164481f: chore(docker): optimize container build context & volume mappings
+• acf5ffe: feat(api): add /predict single audio deepfake detection endpoint
+• 55bd5ef: feat(dataset): implement 1:N multi-speaker dataset identification engine
+• fd89f0d: docs: add PROJECT_EXPLANATION_GUIDE.txt with complete system architecture
+• 6baae57: docs(viva): add live demo synthetic audio generator script and Viva Defense guide
+• 593aa98: feat(eval): add K-Fold cross validation and SNR noise robustness evaluation suite
+===============================================================================

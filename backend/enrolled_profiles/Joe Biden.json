@@ -1,0 +1,11 @@
+{
+  "speaker_name": "Joe Biden",
+  "description": "Default Reference Profile (biden-original.wav)",
+  "sample_count": 1,
+  "filenames": [
+    "biden-original.wav"
+  ],
+  "vector_shape": [
+    130
+  ]
+}

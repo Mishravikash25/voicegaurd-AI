@@ -1,0 +1,11 @@
+{
+  "speaker_name": "Donald Trump",
+  "description": "Default Reference Profile (trump-original.wav)",
+  "sample_count": 1,
+  "filenames": [
+    "trump-original.wav"
+  ],
+  "vector_shape": [
+    130
+  ]
+}

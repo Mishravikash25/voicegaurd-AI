@@ -1,0 +1,12 @@
+{
+  "speaker_name": "soumya",
+  "description": "Custom User Enrolled Profile",
+  "sample_count": 2,
+  "filenames": [
+    "WhatsApp Audio 2026-08-10 at 10.42.43 AM.wav",
+    "WhatsApp Audio 2026-08-10 at 10.42.44 AM.wav"
+  ],
+  "vector_shape": [
+    130
+  ]
+}

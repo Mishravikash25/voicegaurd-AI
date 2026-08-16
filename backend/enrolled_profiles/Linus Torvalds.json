@@ -1,0 +1,11 @@
+{
+  "speaker_name": "Linus Torvalds",
+  "description": "Default Reference Profile (linus-original.wav)",
+  "sample_count": 1,
+  "filenames": [
+    "linus-original.wav"
+  ],
+  "vector_shape": [
+    130
+  ]
+}

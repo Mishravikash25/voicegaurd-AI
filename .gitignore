@@ -1,0 +1,62 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Node & Python Virtual Environments
+node_modules
+venv
+.venv
+ENV
+env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment Variables & Secrets
+.env
+.env.*
+!.env.example
+
+# Archives & Large Datasets
+*.zip
+*.tar.gz
+*.rar
+*.7z
+*.gz
+backend/dataset/KAGGLE/AUDIO/REAL/*
+backend/dataset/KAGGLE/AUDIO/FAKE/*
+!backend/dataset/KAGGLE/AUDIO/REAL/.gitkeep
+!backend/dataset/KAGGLE/AUDIO/FAKE/.gitkeep
+backend/dataset/FAKE_OR_REAL/
+
+# Restore points & Temp
+RESTORE_POINT_BACKUP/
+restore_point_backup/
+
+# Test / Personal Local Enrolled Profiles
+backend/enrolled_profiles/prashant.json
+backend/enrolled_profiles/prashant.npy
+backend/enrolled_profiles/vikash.json
+backend/enrolled_profiles/vikash.npy
+
+# Builds & Outputs
+dist
+dist-ssr
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

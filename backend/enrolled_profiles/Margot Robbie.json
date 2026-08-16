@@ -1,0 +1,11 @@
+{
+  "speaker_name": "Margot Robbie",
+  "description": "Default Reference Profile (margot-original.wav)",
+  "sample_count": 1,
+  "filenames": [
+    "margot-original.wav"
+  ],
+  "vector_shape": [
+    130
+  ]
+}

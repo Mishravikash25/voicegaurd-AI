@@ -1,0 +1,11 @@
+{
+  "speaker_name": "Elon Musk",
+  "description": "Default Reference Profile (musk-original.wav)",
+  "sample_count": 1,
+  "filenames": [
+    "musk-original.wav"
+  ],
+  "vector_shape": [
+    130
+  ]
+}
