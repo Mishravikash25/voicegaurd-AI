@@ -27,14 +27,14 @@ class AudioPreprocessor:
             logger.error(f"Error loading {file_path}: {e}")
             return None
 
-    def apply_bandpass_filter(self, audio: np.ndarray, lowcut: float = 300.0, highcut: float = 3400.0, order: int = 5) -> np.ndarray:
+    def apply_bandpass_filter(self, audio: np.ndarray, lowcut: float = 50.0, highcut: float = 7600.0, order: int = 5) -> np.ndarray:
         """
         Applies a Butterworth bandpass filter. 
-        300-3400 Hz is standard for telephonic voice frequency channels.
+        50-7600 Hz retains wideband acoustic cues (essential for deepfake artifact detection).
         """
         nyquist = 0.5 * self.target_sr
-        low = lowcut / nyquist
-        high = highcut / nyquist
+        low = max(0.001, lowcut / nyquist)
+        high = min(0.999, highcut / nyquist)
         
         # Determine filter coefficients
         b, a = signal.butter(order, [low, high], btype='band')

@@ -97,7 +97,16 @@ def download_in_the_wild_dataset(sample_limit_per_class: int = 250):
                 downloaded_name.rename(dest_file)
             downloaded_fake += 1
         except Exception as e:
-            logger.warning(f"Could not download fake/{fname}: {e}")
+            try:
+                # Fallback to direct path
+                remote_path = f"release_in_the_wild/{fname}"
+                api.dataset_download_file('abdallamohamed312/in-the-wild-audio-deepfake', file_name=remote_path, path=str(fake_dir))
+                downloaded_name = fake_dir / fname
+                if downloaded_name.exists():
+                    downloaded_name.rename(dest_file)
+                downloaded_fake += 1
+            except Exception as e2:
+                logger.warning(f"Could not download fake/{fname}: {e2}")
 
     logger.info(f"Kaggle 'In-The-Wild' Download Complete: {downloaded_real} REAL, {downloaded_fake} FAKE samples ready.")
 

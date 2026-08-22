@@ -121,6 +121,47 @@ class FeatureExtractor:
             logger.error(f"Feature extraction failed: {e}")
             return None
 
+    def extract_features_v2(self, audio: np.ndarray) -> Optional[np.ndarray]:
+        """
+        Extracts the 26-dimensional feature vector matching the schema used by
+        dataset/KAGGLE/DATASET-balanced.csv and the currently trained SVM model
+        (best_svm_model.pkl / feature_scaler.pkl retrained on that CSV).
+
+        Feature order (MUST match training exactly):
+        chroma_stft, rms, spectral_centroid, spectral_bandwidth, rolloff,
+        zero_crossing_rate, mfcc1..mfcc20 (each reduced via mean across time frames)
+        """
+        try:
+            chroma = librosa.feature.chroma_stft(y=audio, sr=self.sample_rate, hop_length=self.hop_length, n_fft=self.n_fft)
+            rms = librosa.feature.rms(y=audio, hop_length=self.hop_length)
+            centroid = librosa.feature.spectral_centroid(y=audio, sr=self.sample_rate, hop_length=self.hop_length, n_fft=self.n_fft)
+            bandwidth = librosa.feature.spectral_bandwidth(y=audio, sr=self.sample_rate, hop_length=self.hop_length, n_fft=self.n_fft)
+            rolloff = librosa.feature.spectral_rolloff(y=audio, sr=self.sample_rate, hop_length=self.hop_length, n_fft=self.n_fft)
+            zcr = librosa.feature.zero_crossing_rate(y=audio, hop_length=self.hop_length)
+            mfccs = librosa.feature.mfcc(y=audio, sr=self.sample_rate, n_mfcc=20, hop_length=self.hop_length, n_fft=self.n_fft)
+
+            features = [
+                float(np.mean(chroma)),
+                float(np.mean(rms)),
+                float(np.mean(centroid)),
+                float(np.mean(bandwidth)),
+                float(np.mean(rolloff)),
+                float(np.mean(zcr)),
+            ]
+            features.extend(np.mean(mfccs, axis=1).tolist())  # mfcc1..mfcc20
+
+            feature_vector = np.array(features, dtype=float)
+
+            if np.any(np.isnan(feature_vector)) or np.any(np.isinf(feature_vector)):
+                logger.warning("NaNs or Infs detected in v2 feature vector. Replacing with 0.")
+                feature_vector = np.nan_to_num(feature_vector)
+
+            return feature_vector
+
+        except Exception as e:
+            logger.error(f"Feature extraction (v2) failed: {e}")
+            return None
+
     def extract_mel_spectrogram(self, signal):
         """
         Extracts a 2D Log-Mel Spectrogram for use in Convolutional Neural Networks (CNNs).
